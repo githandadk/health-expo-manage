@@ -31,6 +31,8 @@ const Admin = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] = useState<keyof Registration>("submittedAt");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedRegistration, setSelectedRegistration] = useState<Registration | null>(null);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -92,6 +94,25 @@ const Admin = () => {
 
     return filtered;
   }, [registrations, searchTerm, sortField, sortDirection]);
+
+  const handleDelete = (registration: Registration) => {
+    setSelectedRegistration(registration);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (selectedRegistration) {
+      const updatedRegistrations = registrations.filter(reg => reg.id !== selectedRegistration.id);
+      localStorage.setItem("healthExpoRegistrations", JSON.stringify(updatedRegistrations));
+      setRegistrations(updatedRegistrations);
+      setDeleteDialogOpen(false);
+      setSelectedRegistration(null);
+      toast({
+        title: "Registration Deleted",
+        description: `${selectedRegistration.firstName} ${selectedRegistration.lastName}'s registration has been removed`,
+      });
+    }
+  };
 
   const exportToCSV = () => {
     const headers = ["First Name", "Last Name", "Email", "Phone", "Hear About", "Interests", "Prayer Topic", "Submitted At"];
@@ -219,12 +240,13 @@ const Admin = () => {
                     <TableHead className="cursor-pointer" onClick={() => handleSort("submittedAt")}>
                       Submitted {sortField === "submittedAt" && (sortDirection === "asc" ? "↑" : "↓")}
                     </TableHead>
+                    <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredAndSorted.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={8} className="text-center text-muted-foreground">
+                      <TableCell colSpan={9} className="text-center text-muted-foreground">
                         No registrations found
                       </TableCell>
                     </TableRow>
@@ -239,6 +261,15 @@ const Admin = () => {
                         <TableCell>{reg.interests?.join(", ") || "-"}</TableCell>
                         <TableCell className="max-w-xs truncate">{reg.prayerTopic || "-"}</TableCell>
                         <TableCell>{new Date(reg.submittedAt).toLocaleString()}</TableCell>
+                        <TableCell>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleDelete(reg)}
+                          >
+                            Delete
+                          </Button>
+                        </TableCell>
                       </TableRow>
                     ))
                   )}
@@ -248,6 +279,25 @@ const Admin = () => {
           </CardContent>
         </Card>
       </div>
+
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Deletion</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete the registration for {selectedRegistration?.firstName} {selectedRegistration?.lastName}? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex gap-2 justify-end">
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={confirmDelete}>
+              Delete
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
