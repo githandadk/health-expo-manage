@@ -1,0 +1,16 @@
+{
+  "title": "Registro para la Expo de Salud de Austin",
+  "firstName": "Nombre",
+  "lastName": "Apellido",
+  "email": "Correo electrónico",
+  "phone": "Teléfono",
+  "languageLabel": "Idioma",
+  "language_en": "Inglés",
+  "language_es": "Español",
+  "language_ko": "Coreano",
+  "optionalInfo": "Información opcional",
+  "submit": "Registrar",
+  "success": "¡Registro completado!",
+  "yourCode": "Tu código de acceso",
+  "printLabel": "Imprimir etiqueta"
+}

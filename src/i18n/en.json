@@ -1,0 +1,16 @@
+{
+  "title": "Austin Community Health Expo Registration",
+  "firstName": "First name",
+  "lastName": "Last name",
+  "email": "Email",
+  "phone": "Phone",
+  "languageLabel": "Language",
+  "language_en": "English",
+  "language_es": "Spanish",
+  "language_ko": "Korean",
+  "optionalInfo": "Optional information",
+  "submit": "Register",
+  "success": "Registration complete!",
+  "yourCode": "Your check-in code",
+  "printLabel": "Print Label"
+}

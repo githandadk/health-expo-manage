@@ -1,0 +1,16 @@
+{
+  "title": "오스틴 커뮤니티 건강 엑스포 등록",
+  "firstName": "이름",
+  "lastName": "성",
+  "email": "이메일",
+  "phone": "전화번호",
+  "languageLabel": "언어",
+  "language_en": "영어",
+  "language_es": "스페인어",
+  "language_ko": "한국어",
+  "optionalInfo": "선택 정보",
+  "submit": "등록",
+  "success": "등록이 완료되었습니다!",
+  "yourCode": "체크인 코드",
+  "printLabel": "라벨 인쇄"
+}
