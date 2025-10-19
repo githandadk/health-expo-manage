@@ -12,5 +12,52 @@
   "submit": "Register",
   "success": "Registration complete!",
   "yourCode": "Your check-in code",
-  "printLabel": "Print Label"
+  "printLabel": "Print Label",
+
+
+  "heroTitle": "Austin Community Health Expo",
+  "heroSubtitle": "Free screenings • Community booths • Family activities",
+  "regCardTitle": "Registration",
+  "contactInfo": "Contact information",
+  "optionalSection": "Optional questions",
+  "household": "Household details",
+  "consents": "Consent & communication",
+  "reviewSubmit": "Review & submit",
+
+  "attendeeCount": "How many people (including you) are attending?",
+  "ageBracket": "Your age bracket",
+  "age_u18": "Under 18",
+  "age_18_34": "18–34",
+  "age_35_49": "35–49",
+  "age_50_64": "50–64",
+  "age_65p": "65+",
+
+  "accessNeeds": "Accessibility needs (optional)",
+  "screeningInterest": "Which screenings interest you? (check all that apply)",
+  "screening_bp": "Blood pressure",
+  "screening_bs": "Blood sugar",
+  "screening_bmi": "BMI/Body composition",
+  "screening_vision": "Vision",
+  "screening_hearing": "Hearing",
+  "screening_dental": "Dental",
+  "screening_other": "Other (type below)",
+
+  "preferredTime": "Preferred arrival window",
+  "pref_morning": "Morning (9–11am)",
+  "pref_midday": "Midday (11am–1pm)",
+  "pref_afternoon": "Afternoon (1–3pm)",
+  "pref_unsure": "I’m not sure yet",
+
+  "churchAffil": "Church or community affiliation (optional)",
+  "newsletterOpt": "Keep me posted about future community events",
+  "photoConsent": "I consent to non-identifying photos at the event",
+  "volunteerInterest": "Interested in volunteering? (optional)",
+
+  "dependentsNote": "If you’re bringing children/guests, note anything we should know:",
+  "notes": "Anything else you'd like us to know?",
+  "otherText": "Other",
+
+  "submitRegistration": "Submit registration",
+  "successThanks": "Thanks! You’re registered.",
+  "confirmationHint": "Show this QR at check-in."
 }
