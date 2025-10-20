@@ -73,6 +73,7 @@
   "ci_bibleStudies": "성경 공부",
   "ci_prophecy": "성경 예언",
   "ci_signs": "사인즈 매거진",
-  "wantPrayer": "기도를 원합니다 (선택)"
+  "wantPrayer": "기도를 원합니다 (선택)",
+  "prayerDetails": "기도 제목 또는 상세 내용 (선택)"
 }
 

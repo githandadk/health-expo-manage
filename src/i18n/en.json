@@ -78,7 +78,10 @@
   "ci_bibleStudies": "Bible studies",
   "ci_prophecy": "Bible prophesy",
   "ci_signs": "Signs Magazine",
-  "wantPrayer": "I would like prayer (Optional)"
+  "wantPrayer": "I would like prayer (Optional)",
+
+  "prayerDetails": "Prayer request or details (optional)"
+
 }
 
 
