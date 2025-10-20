@@ -44,6 +44,7 @@ const wantPrayer = watch('want_prayer') ?? false
   }), [t])
 
   const onSubmit = async (vals: FormVals) => {
+     try {
     const opt_info: any = {
       hear_about: vals.hear_about ?? [],
       contact_interests: vals.contact_interests ?? [],
@@ -52,8 +53,8 @@ const wantPrayer = watch('want_prayer') ?? false
     if (showOther && vals.hear_about_other_text?.trim()) {
       opt_info.hear_about_other_text = vals.hear_about_other_text.trim()
     }
-if (vals.want_prayer && vals.prayer_request?.trim()) {
-  opt_info.prayer_request = vals.prayer_request.trim()
+    if (vals.want_prayer && vals.prayer_request?.trim()) {
+      opt_info.prayer_request = vals.prayer_request.trim()
 }
     const { ticket } = await createRegistration({
       first_name: vals.first_name,
@@ -64,7 +65,10 @@ if (vals.want_prayer && vals.prayer_request?.trim()) {
       opt_info
     })
     setCode(ticket.code)
+  } catch (err: any) {
+    alert(`Registration failed: ${err.message ?? String(err)}`)
   }
+}
 
   // Success screen
   if (code) {
