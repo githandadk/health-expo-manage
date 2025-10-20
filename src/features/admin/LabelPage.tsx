@@ -62,41 +62,37 @@ export default function LabelPage() {
   const fullName = `${record.attendee.first_name} ${record.attendee.last_name}`
 
   return (
-    <div className="w-[3in] h-[2in] p-2 flex items-center justify-between border rounded print:border-0">
-      {/* Left: text */}
-      <div className="pr-2">
-        <div className="text-xl font-bold leading-tight">{fullName}</div>
-        <div className="font-mono text-sm mt-1">Code: {record.code}</div>
-        <div className="no-print mt-3 flex gap-2">
-          <button
-            className="px-3 py-1 rounded bg-gray-900 text-white"
-            onClick={() => window.print()}
-          >
-            Print
-          </button>
-          <button
-            className="px-3 py-1 rounded bg-gray-200"
-            onClick={() => window.close()}
-          >
-            Close
-          </button>
-        </div>
-      </div>
-
-      {/* Right: QR */}
-      <div className="shrink-0">
-        <QRCodeCanvas value={record.code} size={220} includeMargin={false} />
-      </div>
-
-      {/* Print CSS */}
-      <style>{`
-        @page { size: 3in 2in; margin: 0.1in; }
-        @media print {
-          body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-          .print\\:border-0 { border-width: 0 !important; }
-          .no-print { display: none !important; }
-        }
-      `}</style>
+<div className="w-[3in] h-[2in] p-2 flex items-center justify-between border rounded print:border-0">
+  {/* Left: text */}
+  <div className="pr-2 shrink min-w-0">
+    <div className="text-xl font-bold leading-tight truncate">
+      {rec.attendee.first_name} {rec.attendee.last_name}
     </div>
+    <div className="font-mono text-sm mt-1 break-all">Code: {rec.code}</div>
+    <div className="no-print mt-3">
+      <button className="px-3 py-1 rounded bg-gray-900 text-white" onClick={() => window.print()}>Print</button>
+    </div>
+  </div>
+
+  {/* Right: QR (scaled down) */}
+  <div className="shrink-0 w-[1.25in] h-[1.25in] flex items-center justify-center">
+    {/* Render a high-res canvas, but display at a fixed inch size */}
+    <QRCodeCanvas
+      value={rec.code}
+      size={256}                          // internal resolution (sharp print)
+      includeMargin={false}
+      style={{ width: '1.25in', height: '1.25in' }} // display size
+    />
+  </div>
+
+  <style>{`
+    @page { size: 3in 2in; margin: 0.1in; }
+    @media print {
+      body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .print\\:border-0 { border-width: 0 !important; }
+      .no-print { display: none !important; }
+    }
+  `}</style>
+</div>
   )
 }
