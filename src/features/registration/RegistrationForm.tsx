@@ -19,7 +19,8 @@ const schema = z.object({
   contact_interests: z.array(z.enum([
     'fellowship','cooking','seminar','outdoor','korean','bible_studies','prophecy','signs'
   ])).optional(),
-  want_prayer: z.boolean().optional()
+  want_prayer: z.boolean().optional(),
+  prayer_request: z.string().optional()
 })
 type FormVals = z.infer<typeof schema>
 
@@ -34,7 +35,7 @@ export default function RegistrationForm() {
 
   const hearAbout = watch('hear_about') || []
   const showOther = hearAbout.includes('other')
-
+const wantPrayer = watch('want_prayer') ?? false
   const label = useMemo(() => ({
     first: t.firstName,
     last: t.lastName,
@@ -51,7 +52,9 @@ export default function RegistrationForm() {
     if (showOther && vals.hear_about_other_text?.trim()) {
       opt_info.hear_about_other_text = vals.hear_about_other_text.trim()
     }
-
+if (vals.want_prayer && vals.prayer_request?.trim()) {
+  opt_info.prayer_request = vals.prayer_request.trim()
+}
     const { ticket } = await createRegistration({
       first_name: vals.first_name,
       last_name: vals.last_name,
@@ -202,12 +205,21 @@ export default function RegistrationForm() {
         </div>
 
         {/* I would like prayer */}
-        <div className="mt-6">
-          <label className="flex items-center gap-2">
-            <input type="checkbox" {...register('want_prayer')} />
-            <span>{t.wantPrayer}</span>
-          </label>
-        </div>
+<div className="mt-6 space-y-2">
+  <label className="flex items-center gap-2">
+    <input type="checkbox" {...register('want_prayer')} />
+    <span>{t.wantPrayer}</span>
+  </label>
+
+  {wantPrayer && (
+    <textarea
+      rows={3}
+      className="w-full border rounded p-2"
+      placeholder={t.prayerDetails}
+      {...register('prayer_request')}
+    />
+  )}
+</div>
       </section>
 
       <div className="pt-2">
