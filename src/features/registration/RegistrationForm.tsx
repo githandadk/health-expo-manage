@@ -84,7 +84,12 @@ const wantPrayer = watch('want_prayer') ?? false
           className="mt-4 px-4 py-2 rounded bg-gray-900 text-white"
           onClick={() => window.print()}
         >
-          {t.printLabel}
+          {t.printLabel} </button>
+<button 
+          className="mt-2 px-4 py-2 rounded bg-gray-200 text-gray-900"
+  onClick={() => { window.location.href = '/' }}   // or use navigate('/') if you prefer
+>
+  {t.registerAnother}
         </button>
       </div>
     )

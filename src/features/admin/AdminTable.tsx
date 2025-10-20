@@ -6,6 +6,10 @@ import { findByCode, checkIn } from '@/features/checkin/api'
 
 type Row = {
   id: string; first_name: string; last_name: string; email: string; phone: string; language: string; created_at: string;
+  opt_info?: {
+    prayer_request?: string
+    [key: string]: any
+  } | null
   tickets: { code: string; status: string; checked_in_at: string | null }[] | null
 }
 
@@ -20,7 +24,7 @@ export default function AdminTable() {
   async function load() {
     let query = supabase
       .from('attendees')
-      .select('id, first_name, last_name, email, phone, language, created_at, tickets:tickets(code, status, checked_in_at)')
+      .select('id, first_name, last_name, email, phone, language, created_at, opt_info, tickets:tickets(id, code, status, checked_in_at)')
       .order(sort, { ascending: dir === 'asc' })
       .range(0, 199) // first 200; adjust / paginate as needed
 
@@ -35,13 +39,42 @@ export default function AdminTable() {
   useEffect(()=>{ load() },[q, sort, dir])
 
   const exportAll = () => {
-    const flat = rows.map(r => ({
-      first_name: r.first_name, last_name: r.last_name, email: r.email, phone: r.phone,
-      language: r.language, code: r.tickets?.[0]?.code ?? '', status: r.tickets?.[0]?.status ?? '',
-      checked_in_at: r.tickets?.[0]?.checked_in_at ?? '', created_at: r.created_at
-    }))
-    downloadCsv('expo-attendees.csv', flat, ['first_name','last_name','email','phone','language','code','status','checked_in_at','created_at'])
-  }
+  const rowsFlat = rows.map((r) => {
+    const tk = r.tickets?.[0] ?? {}
+    const oi: any = r.opt_info || {}
+
+    const join = (v: any) => Array.isArray(v) ? v.join('; ') : (v ?? '')
+    return {
+      first_name: r.first_name,
+      last_name: r.last_name,
+      email: r.email,
+      phone: r.phone,
+      language: r.language,
+      code: tk.code ?? '',
+      status: tk.status ?? '',
+      checked_in_at: tk.checked_in_at ?? '',
+      created_at: r.created_at,
+
+      // Optional info (from your current form spec)
+      hear_about: join(oi.hear_about),
+      hear_about_other_text: oi.hear_about_other_text ?? '',
+      contact_interests: join(oi.contact_interests),
+      want_prayer: oi.want_prayer ? 'yes' : 'no',
+      prayer_request: oi.prayer_request ?? ''
+    }
+  })
+
+  downloadCsv(
+    'expo-attendees.csv',
+    rowsFlat,
+    [
+      'first_name','last_name','email','phone','language',
+      'code','status','checked_in_at','created_at',
+      'hear_about','hear_about_other_text','contact_interests',
+      'want_prayer','prayer_request'
+    ]
+  )
+}
 
   const delAttendee = async (id: string) => {
     if (!confirm('Delete this attendee (and ticket)?')) return
