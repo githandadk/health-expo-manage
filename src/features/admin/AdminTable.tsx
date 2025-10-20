@@ -149,37 +149,50 @@ export default function AdminTable() {
       <div className="overflow-auto border rounded">
         <table className="min-w-[800px] w-full">
           <thead className="bg-gray-50">
-            <tr>
-              <th className="text-left p-2">Name</th>
-              <th className="text-left p-2">Email</th>
-              <th className="text-left p-2">Phone</th>
-              <th className="text-left p-2">Lang</th>
-              <th className="text-left p-2">Code</th>
-              <th className="text-left p-2">Status</th>
-              <th className="text-left p-2 w-24">Actions</th>
-            </tr>
-          </thead>
+  <tr>
+    <th className="text-left p-2">Name</th>
+    <th className="text-left p-2">Email</th>
+    <th className="text-left p-2">Phone</th>
+    <th className="text-left p-2">Lang</th>
+    <th className="text-left p-2">Code</th>
+    <th className="text-left p-2">Status</th>
+    <th className="text-left p-2">Prayer Request</th> {/* <-- add this */}
+    <th className="text-left p-2 w-24">Actions</th>
+  </tr>
+</thead>
           <tbody>
-            {rows.map(r => {
-              const tk = r.tickets?.[0]
-              return (
-                <tr key={r.id} className="border-t">
-                  <td className="p-2">{r.first_name} {r.last_name}</td>
-                  <td className="p-2">{r.email}</td>
-                  <td className="p-2">{r.phone}</td>
-                  <td className="p-2 uppercase">{r.language}</td>
-                  <td className="p-2 font-mono">{tk?.code ?? ''}</td>
-                  <td className="p-2">{tk?.status ?? ''}</td>
-                  <td className="p-2">
-                    <div className="flex gap-2">
-                      <a className="px-2 py-1 rounded bg-gray-700 text-white text-sm" href={`/admin/label/${tk?.id ?? ''}`} target="_blank">Label</a>
-                      <button className="px-2 py-1 rounded bg-red-600 text-white text-sm" onClick={()=>delAttendee(r.id)}>Delete</button>
-                    </div>
-                  </td>
-                </tr>
-              )
-            })}
-          </tbody>
+  {rows.map(r => {
+    const tk = r.tickets?.[0]
+    const prayer = r.opt_info?.prayer_request ?? ''
+    return (
+      <tr key={r.id} className="border-t">
+        <td className="p-2">{r.first_name} {r.last_name}</td>
+        <td className="p-2">{r.email}</td>
+        <td className="p-2">{r.phone}</td>
+        <td className="p-2 uppercase">{r.language}</td>
+        <td className="p-2 font-mono">{tk?.code ?? ''}</td>
+        <td className="p-2">{tk?.status ?? ''}</td>
+
+        {/* New Prayer Request column */}
+        <td className="p-2 max-w-[260px]">
+          <div
+            className="text-sm text-gray-800 line-clamp-2"
+            title={prayer}
+          >
+            {prayer || '—'}
+          </div>
+        </td>
+
+        <td className="p-2">
+          <div className="flex gap-2">
+            <a className="px-2 py-1 rounded bg-gray-700 text-white text-sm" href={`/admin/label/${tk?.id ?? ''}`} target="_blank" rel="noreferrer">Label</a>
+            <button className="px-2 py-1 rounded bg-red-600 text-white text-sm" onClick={()=>delAttendee(r.id)}>Delete</button>
+          </div>
+        </td>
+      </tr>
+    )
+  })}
+</tbody>
         </table>
       </div>
     </div>
