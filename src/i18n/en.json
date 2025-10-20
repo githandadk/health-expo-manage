@@ -59,5 +59,26 @@
 
   "submitRegistration": "Submit registration",
   "successThanks": "Thanks! You’re registered.",
-  "confirmationHint": "Show this QR at check-in."
+  "confirmationHint": "Show this QR at check-in.",
+  
+  "optionalSection": "Optional questions",
+  "hearAbout": "How did you hear about the expo?",
+  "ha_churchFriend": "Church/Friend",
+  "ha_newspaper": "Newspaper Ad",
+  "ha_poster": "Poster Ad",
+  "ha_online": "YouTube/Online",
+  "ha_other": "Other",
+  "otherText": "Other (please specify)",
+  "contactMore": "Contact me with more info about these items (Optional)",
+  "ci_fellowship": "Healthy Fellowship",
+  "ci_cooking": "Healthy Cooking",
+  "ci_seminar": "Health Seminar",
+  "ci_outdoor": "Outdoor sports/games",
+  "ci_korean": "Korean class",
+  "ci_bibleStudies": "Bible studies",
+  "ci_prophecy": "Bible prophesy",
+  "ci_signs": "Signs Magazine",
+  "wantPrayer": "I would like prayer (Optional)"
 }
+
+

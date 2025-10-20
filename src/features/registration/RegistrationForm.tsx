@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react'
-import { useForm, Controller } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { QRCodeCanvas } from 'qrcode.react'
@@ -13,40 +13,27 @@ const schema = z.object({
   phone: z.string().min(7, 'Required'),
   language: z.enum(['en','es','ko']),
 
-  // Optionals:
-  attendee_count: z.coerce.number().min(1).max(20).optional(),
-  age_bracket: z.enum(['u18','18_34','35_49','50_64','65p']).optional(),
-  access_needs: z.string().optional(),
-  screenings: z.array(z.string()).optional(),
-  screening_other: z.string().optional(),
-  preferred_time: z.enum(['morning','midday','afternoon','unsure']).optional(),
-  church_affil: z.string().optional(),
-  newsletter_opt: z.boolean().optional(),
-  photo_consent: z.boolean().optional(),
-  volunteer_interest: z.boolean().optional(),
-  dependents_note: z.string().optional(),
-  notes: z.string().optional()
+  // Optional fields (your new set)
+  hear_about: z.array(z.enum(['church_friend','newspaper','poster','online','other'])).optional(),
+  hear_about_other_text: z.string().optional(),
+  contact_interests: z.array(z.enum([
+    'fellowship','cooking','seminar','outdoor','korean','bible_studies','prophecy','signs'
+  ])).optional(),
+  want_prayer: z.boolean().optional()
 })
 type FormVals = z.infer<typeof schema>
-
-const screeningKeys = [
-  'bp','bs','bmi','vision','hearing','dental','other'
-] as const
 
 export default function RegistrationForm() {
   const { t, lang, setLang } = useI18n()
   const [code, setCode] = useState<string | null>(null)
 
-  const {
-    register, handleSubmit, control,
-    formState: { errors, isSubmitting }, watch
-  } = useForm<FormVals>({
+  const { register, handleSubmit, formState: { errors, isSubmitting }, watch } = useForm<FormVals>({
     resolver: zodResolver(schema),
-    defaultValues: { language: lang, newsletter_opt: true }
+    defaultValues: { language: lang, want_prayer: false }
   })
 
-  const screenings = watch('screenings') || []
-  const wantsOther = screenings.includes('other')
+  const hearAbout = watch('hear_about') || []
+  const showOther = hearAbout.includes('other')
 
   const label = useMemo(() => ({
     first: t.firstName,
@@ -56,20 +43,15 @@ export default function RegistrationForm() {
   }), [t])
 
   const onSubmit = async (vals: FormVals) => {
-    const opt_info = {
-      attendee_count: vals.attendee_count,
-      age_bracket: vals.age_bracket,
-      access_needs: vals.access_needs,
-      screenings: vals.screenings,
-      screening_other: vals.screening_other,
-      preferred_time: vals.preferred_time,
-      church_affil: vals.church_affil,
-      newsletter_opt: !!vals.newsletter_opt,
-      photo_consent: !!vals.photo_consent,
-      volunteer_interest: !!vals.volunteer_interest,
-      dependents_note: vals.dependents_note,
-      notes: vals.notes
+    const opt_info: any = {
+      hear_about: vals.hear_about ?? [],
+      contact_interests: vals.contact_interests ?? [],
+      want_prayer: !!vals.want_prayer
     }
+    if (showOther && vals.hear_about_other_text?.trim()) {
+      opt_info.hear_about_other_text = vals.hear_about_other_text.trim()
+    }
+
     const { ticket } = await createRegistration({
       first_name: vals.first_name,
       last_name: vals.last_name,
@@ -81,17 +63,20 @@ export default function RegistrationForm() {
     setCode(ticket.code)
   }
 
-  // Success view
+  // Success screen
   if (code) {
     return (
-      <div className="max-w-lg mx-auto text-center">
-        <h3 className="text-2xl font-semibold mb-2">{t.successThanks}</h3>
-        <p className="text-gray-600 mb-4">{t.confirmationHint}</p>
-        <div className="border rounded p-3 inline-block">
-          <QRCodeCanvas value={code} size={220} includeMargin />
+      <div className="max-w-md mx-auto p-6 text-center">
+        <h2 className="text-2xl font-semibold mb-2">{t.successThanks ?? t.success}</h2>
+        <p className="text-gray-600 mb-4">{t.confirmationHint ?? t.yourCode}</p>
+        <div className="border rounded p-3 mx-auto w-fit">
+          <QRCodeCanvas value={code} size={240} includeMargin />
         </div>
         <p className="mt-3 font-mono">{t.yourCode}: {code}</p>
-        <button className="mt-4 px-4 py-2 rounded bg-gray-900 text-white" onClick={()=>window.print()}>
+        <button
+          className="mt-4 px-4 py-2 rounded bg-gray-900 text-white"
+          onClick={() => window.print()}
+        >
           {t.printLabel}
         </button>
       </div>
@@ -139,122 +124,89 @@ export default function RegistrationForm() {
 
       <hr className="border-gray-200" />
 
-      {/* Optional questions */}
+      {/* Optional questions (ONLY your specified ones) */}
       <section>
         <h4 className="font-semibold text-lg mb-3">{t.optionalSection}</h4>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Household */}
-          <div className="md:col-span-1">
-            <label className="block text-sm font-medium mb-1">{t.attendeeCount}</label>
-            <input type="number" min={1} max={20} className="w-full border rounded p-2"
-              {...register('attendee_count', { valueAsNumber: true })} />
-          </div>
-
-          {/* Age */}
-          <div className="md:col-span-1">
-            <label className="block text-sm font-medium mb-1">{t.ageBracket}</label>
-            <select className="w-full border rounded p-2" {...register('age_bracket')}>
-              <option value="">{/* empty */}</option>
-              <option value="u18">{t.age_u18}</option>
-              <option value="18_34">{t.age_18_34}</option>
-              <option value="35_49">{t.age_35_49}</option>
-              <option value="50_64">{t.age_50_64}</option>
-              <option value="65p">{t.age_65p}</option>
-            </select>
-          </div>
-
-          {/* Accessibility */}
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium mb-1">{t.accessNeeds}</label>
-            <input className="w-full border rounded p-2" placeholder="(e.g., wheelchair access, interpreter, etc.)"
-              {...register('access_needs')} />
-          </div>
-
-          {/* Screening interests */}
-          <div className="md:col-span-2">
-            <p className="block text-sm font-medium mb-2">{t.screeningInterest}</p>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-              <label className="flex items-center gap-2">
-                <input type="checkbox" value="bp" {...register('screenings')} />
-                <span>{t.screening_bp}</span>
-              </label>
-              <label className="flex items-center gap-2">
-                <input type="checkbox" value="bs" {...register('screenings')} />
-                <span>{t.screening_bs}</span>
-              </label>
-              <label className="flex items-center gap-2">
-                <input type="checkbox" value="bmi" {...register('screenings')} />
-                <span>{t.screening_bmi}</span>
-              </label>
-              <label className="flex items-center gap-2">
-                <input type="checkbox" value="vision" {...register('screenings')} />
-                <span>{t.screening_vision}</span>
-              </label>
-              <label className="flex items-center gap-2">
-                <input type="checkbox" value="hearing" {...register('screenings')} />
-                <span>{t.screening_hearing}</span>
-              </label>
-              <label className="flex items-center gap-2">
-                <input type="checkbox" value="dental" {...register('screenings')} />
-                <span>{t.screening_dental}</span>
-              </label>
-              <label className="flex items-center gap-2">
-                <input type="checkbox" value="other" {...register('screenings')} />
-                <span>{t.screening_other}</span>
-              </label>
-            </div>
-
-            {wantsOther && (
-              <input className="mt-2 w-full border rounded p-2" placeholder={t.otherText}
-                {...register('screening_other')} />
-            )}
-          </div>
-
-          {/* Preferred time */}
-          <div className="md:col-span-1">
-            <label className="block text-sm font-medium mb-1">{t.preferredTime}</label>
-            <select className="w-full border rounded p-2" {...register('preferred_time')}>
-              <option value="">{/* empty */}</option>
-              <option value="morning">{t.pref_morning}</option>
-              <option value="midday">{t.pref_midday}</option>
-              <option value="afternoon">{t.pref_afternoon}</option>
-              <option value="unsure">{t.pref_unsure}</option>
-            </select>
-          </div>
-
-          {/* Church/community affiliation */}
-          <div className="md:col-span-1">
-            <label className="block text-sm font-medium mb-1">{t.churchAffil}</label>
-            <input className="w-full border rounded p-2" {...register('church_affil')} />
-          </div>
-
-          {/* Opt-ins */}
-          <div className="md:col-span-2 grid grid-cols-1 gap-2">
+        {/* How did you hear about the expo? */}
+        <div className="space-y-2">
+          <p className="text-sm font-medium">{t.hearAbout}</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             <label className="flex items-center gap-2">
-              <input type="checkbox" {...register('newsletter_opt')} />
-              <span>{t.newsletterOpt}</span>
+              <input type="checkbox" value="church_friend" {...register('hear_about')} />
+              <span>{t.ha_churchFriend}</span>
             </label>
             <label className="flex items-center gap-2">
-              <input type="checkbox" {...register('photo_consent')} />
-              <span>{t.photoConsent}</span>
+              <input type="checkbox" value="newspaper" {...register('hear_about')} />
+              <span>{t.ha_newspaper}</span>
             </label>
             <label className="flex items-center gap-2">
-              <input type="checkbox" {...register('volunteer_interest')} />
-              <span>{t.volunteerInterest}</span>
+              <input type="checkbox" value="poster" {...register('hear_about')} />
+              <span>{t.ha_poster}</span>
+            </label>
+            <label className="flex items-center gap-2">
+              <input type="checkbox" value="online" {...register('hear_about')} />
+              <span>{t.ha_online}</span>
+            </label>
+            <label className="flex items-center gap-2 md:col-span-2">
+              <input type="checkbox" value="other" {...register('hear_about')} />
+              <span>{t.ha_other}</span>
             </label>
           </div>
+          {showOther && (
+            <input
+              className="mt-1 w-full border rounded p-2"
+              placeholder={t.otherText}
+              {...register('hear_about_other_text')}
+            />
+          )}
+        </div>
 
-          {/* Dependents/notes */}
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium mb-1">{t.dependentsNote}</label>
-            <textarea rows={2} className="w-full border rounded p-2" {...register('dependents_note')} />
+        {/* Contact me with more info about… */}
+        <div className="space-y-2 mt-6">
+          <p className="text-sm font-medium">{t.contactMore}</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <label className="flex items-center gap-2">
+              <input type="checkbox" value="fellowship" {...register('contact_interests')} />
+              <span>{t.ci_fellowship}</span>
+            </label>
+            <label className="flex items-center gap-2">
+              <input type="checkbox" value="cooking" {...register('contact_interests')} />
+              <span>{t.ci_cooking}</span>
+            </label>
+            <label className="flex items-center gap-2">
+              <input type="checkbox" value="seminar" {...register('contact_interests')} />
+              <span>{t.ci_seminar}</span>
+            </label>
+            <label className="flex items-center gap-2">
+              <input type="checkbox" value="outdoor" {...register('contact_interests')} />
+              <span>{t.ci_outdoor}</span>
+            </label>
+            <label className="flex items-center gap-2">
+              <input type="checkbox" value="korean" {...register('contact_interests')} />
+              <span>{t.ci_korean}</span>
+            </label>
+            <label className="flex items-center gap-2">
+              <input type="checkbox" value="bible_studies" {...register('contact_interests')} />
+              <span>{t.ci_bibleStudies}</span>
+            </label>
+            <label className="flex items-center gap-2">
+              <input type="checkbox" value="prophecy" {...register('contact_interests')} />
+              <span>{t.ci_prophecy}</span>
+            </label>
+            <label className="flex items-center gap-2">
+              <input type="checkbox" value="signs" {...register('contact_interests')} />
+              <span>{t.ci_signs}</span>
+            </label>
           </div>
+        </div>
 
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium mb-1">{t.notes}</label>
-            <textarea rows={3} className="w-full border rounded p-2" {...register('notes')} />
-          </div>
+        {/* I would like prayer */}
+        <div className="mt-6">
+          <label className="flex items-center gap-2">
+            <input type="checkbox" {...register('want_prayer')} />
+            <span>{t.wantPrayer}</span>
+          </label>
         </div>
       </section>
 
@@ -263,7 +215,7 @@ export default function RegistrationForm() {
           disabled={isSubmitting}
           className="px-4 py-2 rounded bg-blue-600 text-white disabled:opacity-60"
         >
-          {isSubmitting ? '...' : t.submitRegistration}
+          {isSubmitting ? '...' : (t.submitRegistration ?? t.submit)}
         </button>
       </div>
     </form>
