@@ -8,8 +8,11 @@ export default function WhoAmI() {
     (async () => {
       const u = await supabase.auth.getUser()
       const s = await supabase.auth.getSession()
-      setInfo({ user: u.data.user, session: s.data.session, url: import.meta.env.VITE_SUPABASE_URL })
-      console.log('[whoami]', { u, s })
+      setInfo({
+        url: import.meta.env.VITE_SUPABASE_URL,
+        user: u.data.user,
+        hasToken: !!s.data.session?.access_token
+      })
     })()
   }, [])
   return <pre className="p-4 text-xs bg-gray-100 rounded">{JSON.stringify(info, null, 2)}</pre>
