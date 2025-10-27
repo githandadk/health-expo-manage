@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
+import { supabase } from '@/lib/supabase' // if referenced
 import CheckinGuard from '@/features/checkin/CheckinGuard'
 import QrScanner from '@/features/checkin/QrScanner' // the fixed one you already use
 import { listBooths, addCheckinByCode, searchAttendees } from '@/features/checkin/api'
