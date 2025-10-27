@@ -8,12 +8,16 @@ import AdminPage from '@/features/admin/AdminPage'
 import LabelPage from '@/features/admin/LabelPage'
 import './index.css'
 import WhoAmI from '@/pages/admin/WhoAmI'   // <-- add
+import BoothsPage from '@/pages/admin/BoothsPage'
+import CheckinPage from '@/pages/CheckinPage'
 
 const router = createBrowserRouter([
   { path: '/', element: <RegistrationPage /> },
   { path: '/admin/login', element: <LoginPage /> },
   { path: '/admin', element: <AdminPage /> },
   { path: '/admin/label/:id', element: <LabelPage /> },
+  { path: '/checkin', element: <CheckinPage /> }, // guarded inside component
+  { path: '/admin/booths', element: <BoothsPage /> },  // <-- add
   { path: '/admin/whoami', element: <WhoAmI /> }   // <-- add
 ])
 
