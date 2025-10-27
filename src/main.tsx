@@ -6,6 +6,7 @@ import RegistrationPage from '@/pages/RegistrationPage'
 import LoginPage from '@/pages/admin/LoginPage'
 import AdminPage from '@/features/admin/AdminPage'
 import LabelPage from '@/features/admin/LabelPage'
+import './index.css'
 import WhoAmI from '@/pages/admin/WhoAmI'   // <-- add
 
 const router = createBrowserRouter([
