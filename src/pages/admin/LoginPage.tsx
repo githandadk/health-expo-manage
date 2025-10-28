@@ -9,16 +9,32 @@ export default function LoginPage() {
   const [msg, setMsg] = useState<string | null>(null)
 
   const signIn = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setMsg(null); setLoading(true)
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-    setLoading(false)
-    console.log('[login] signInWithPassword:', { data, error, URL: import.meta.env.VITE_SUPABASE_URL })
-    if (error) return setMsg(error.message)
-    const u = await supabase.auth.getUser()
-    console.log('[login] getUser:', u)
-    location.href = '/admin'
+  e.preventDefault()
+  setMsg(null); setLoading(true)
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+  setLoading(false)
+
+  if (error) {
+    setMsg(error.message)
+    return
   }
+
+  // fetch fresh user to read app_metadata.role
+  const { data: u } = await supabase.auth.getUser()
+  const role = (u.user?.app_metadata as any)?.role
+
+  // route by role
+  if (role === 'admin') {
+    location.href = '/admin'
+  } else if (role === 'checkin') {
+    location.href = '/checkin'
+  } else {
+    // unknown role — send back to login with a message
+    setMsg('Your account does not have access. Contact an administrator.')
+    // optional: sign out to avoid a confusing stale session
+    await supabase.auth.signOut()
+  }
+}
 
   const resetPw = async () => {
     if (!email) return setMsg('Enter your email first.')
