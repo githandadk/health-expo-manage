@@ -2,6 +2,7 @@ import React from 'react'
 import { I18nProvider, useI18n } from '@/lib/i18n'
 import RegistrationForm from '@/features/registration/RegistrationForm'
 import { useNavigate } from 'react-router-dom'
+import { createRegistration } from '@/features/registration/api' // <-- add this import
 
 function Hero() {
   const { t, lang, setLang } = useI18n()
@@ -17,7 +18,7 @@ function Hero() {
             <label className="text-sm opacity-90">Language</label>
             <select
               value={lang}
-              onChange={(e)=>setLang(e.target.value as any)}
+              onChange={(e) => setLang(e.target.value as any)}
               className="text-gray-900 rounded px-2 py-1"
             >
               <option value="en">English</option>
@@ -30,9 +31,38 @@ function Hero() {
     </header>
   )
 }
-const navigate = useNavigate()
 
 export default function RegistrationPage() {
+  const navigate = useNavigate()
+
+  // This handler is passed down to the form and runs the RPC.
+  // On success, it navigates to /success with name + code.
+  const handleSubmit = async (values: {
+    first_name: string
+    last_name: string
+    email: string
+    phone: string
+    language: 'en' | 'es' | 'ko'
+    // plus any optional fields your form includes
+    [k: string]: any
+  }) => {
+    try {
+      const res = await createRegistration(values) // expected { ticket: { code } }
+      const code = res?.ticket?.code
+      if (!code) throw new Error('No code returned')
+
+      navigate('/success', {
+        state: {
+          code,
+          first_name: values.first_name,
+          last_name: values.last_name
+        }
+      })
+    } catch (e: any) {
+      alert(`Registration failed: ${e.message || 'Unknown error'}`)
+    }
+  }
+
   return (
     <I18nProvider>
       <Hero />
@@ -42,7 +72,8 @@ export default function RegistrationPage() {
             <h2 className="text-xl font-semibold">Registration</h2>
           </div>
           <div className="p-6">
-            <RegistrationForm />
+            {/* Pass the submit handler to your form */}
+            <RegistrationForm onSubmit={handleSubmit} />
           </div>
         </div>
         <p className="text-xs text-gray-500 mt-4">
@@ -51,26 +82,4 @@ export default function RegistrationPage() {
       </main>
     </I18nProvider>
   )
-}
-async function onSubmit(values: {
-  first_name: string
-  last_name: string
-  email: string
-  phone: string
-  language: 'en'|'es'|'ko'
-  // ... any optional fields
-}) {
-  try {
-    const res = await createRegistration(values) // returns { ticket: { code } }
-    const code = res.ticket.code
-    navigate('/success', {
-      state: {
-        code,
-        first_name: values.first_name,
-        last_name: values.last_name
-      }
-    })
-  } catch (e:any) {
-    alert(`Registration failed: ${e.message}`)
-  }
 }
