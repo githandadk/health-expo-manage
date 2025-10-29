@@ -14,13 +14,7 @@ type Row = {
   opt_info?: OptInfo | null
   tickets: Ticket[] | null
 }
-
-type Checkin = {
-  attendee_id: string
-  booth_name: string
-  note: string | null
-  created_at: string
-}
+type Checkin = { attendee_id: string; booth_name: string; note: string | null; created_at: string }
 
 const PAGE_LIMIT = 200
 
@@ -34,15 +28,13 @@ function downloadCsv(filename: string, rows: any[], headers: string[]) {
     headers.join(','),
     ...rows.map(r => headers.map(h => esc(r[h])).join(','))
   ]
-  // 👇 Add UTF-8 BOM so Excel displays Korean properly
-  const BOM = '\uFEFF'
+  const BOM = '\uFEFF' // UTF-8 BOM so Excel renders Korean correctly
   const csv = BOM + lines.join('\n')
-  
-  const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' })
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = filename
+  a.download = filename.endsWith('.csv') ? filename : `${filename}.csv`
   document.body.appendChild(a)
   a.click()
   a.remove()
@@ -72,7 +64,6 @@ export default function AdminTable() {
     (async () => {
       setLoading(true)
       try {
-        // Load attendees (with tickets)
         let query = supabase
           .from('attendees')
           .select(`
@@ -98,12 +89,10 @@ export default function AdminTable() {
         if (error) throw error
         setRows(rowsData as Row[])
 
-        // Load all check-ins (joined view)
         const { data: ci, error: ciErr } = await supabase
           .from('v_checkins')
           .select('attendee_id, booth_name, note, created_at')
           .order('created_at', { ascending: true })
-
         if (ciErr) throw ciErr
         setAllCheckins((ci ?? []) as Checkin[])
       } catch (e: any) {
@@ -123,14 +112,15 @@ export default function AdminTable() {
     setToast('Deleted')
   }
 
-  const exportAll = () => {
+  // Build a normalized export dataset once, reuse for CSV/XLSX
+  const buildExport = () => {
     const headers = [
       'first_name','last_name','email','phone','language',
       'code','status','checked_in_at','created_at',
       'hear_about','hear_about_other_text','contact_interests',
       'want_prayer','prayer_request',
       'booths'
-    ]
+    ] as const
 
     const out = rows.map(r => {
       const tk = r.tickets?.[0] ?? {}
@@ -140,7 +130,6 @@ export default function AdminTable() {
       const boothsStr = cis
         .map(ci => `${ci.booth_name}${ci.note ? ' ('+ci.note+')' : ''} @ ${new Date(ci.created_at).toLocaleString()}`)
         .join('; ')
-
       return {
         first_name: r.first_name,
         last_name: r.last_name,
@@ -159,9 +148,47 @@ export default function AdminTable() {
         booths: boothsStr
       }
     })
+    return { headers: [...headers], out }
+  }
 
+  const exportCsv = () => {
+    const { headers, out } = buildExport()
     downloadCsv('expo-attendees.csv', out, headers)
   }
+
+const exportExcel = async () => {
+  const writeXlsxFile = (await import('write-excel-file')).default
+
+  const { headers, out } = buildExport() // your existing builder from earlier
+
+  // Build a schema once so columns are ordered and typed
+  const schema = headers.map((h) => {
+    // simple type hints (optional)
+    const numCols = new Set(['status'])
+    const dateCols = new Set(['created_at', 'checked_in_at'])
+    const booleanCols = new Set(['want_prayer'])
+
+    let type: any = String
+    if (numCols.has(h)) type = String
+    if (dateCols.has(h)) type = String
+    if (booleanCols.has(h)) type = String
+
+    return {
+      column: h,               // header caption
+      type,                    // treat everything as string for simplicity / i18n
+      value: (row: any) => row[h] ?? ''
+    }
+  })
+
+  await writeXlsxFile(out, {
+    schema,
+    fileName: 'expo-attendees.xlsx',
+    sheet: 'Attendees',
+    // RTL not needed, but library supports it if you ever use RTL locales
+    // rightToLeft: true,
+  })
+}
+
 
   return (
     <div className="space-y-4">
@@ -191,7 +218,8 @@ export default function AdminTable() {
         <div className="ml-auto flex items-center gap-2">
           <a className="px-3 py-2 rounded bg-indigo-600 text-white" href="/checkin">Go to Check-in</a>
           <a className="px-3 py-2 rounded bg-sky-600 text-white" href="/admin/booths">Manage Booths</a>
-          <button className="px-3 py-2 rounded bg-green-600 text-white" onClick={exportAll}>Export CSV</button>
+          <button className="px-3 py-2 rounded bg-green-600 text-white" onClick={exportCsv}>Export CSV</button>
+          <button className="px-3 py-2 rounded bg-emerald-600 text-white" onClick={exportExcel}>Export Excel (.xlsx)</button>
         </div>
       </div>
 
@@ -211,13 +239,8 @@ export default function AdminTable() {
             </tr>
           </thead>
           <tbody>
-            {loading && (
-              <tr><td colSpan={9} className="p-4">Loading…</td></tr>
-            )}
-
-            {!loading && rows.length === 0 && (
-              <tr><td colSpan={9} className="p-4 text-gray-500">No results.</td></tr>
-            )}
+            {loading && <tr><td colSpan={9} className="p-4">Loading…</td></tr>}
+            {!loading && rows.length === 0 && <tr><td colSpan={9} className="p-4 text-gray-500">No results.</td></tr>}
 
             {!loading && rows.map(r => {
               const tk = r.tickets?.[0]
