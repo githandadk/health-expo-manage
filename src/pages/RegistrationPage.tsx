@@ -1,6 +1,7 @@
 import React from 'react'
 import { I18nProvider, useI18n } from '@/lib/i18n'
 import RegistrationForm from '@/features/registration/RegistrationForm'
+import { useNavigate } from 'react-router-dom'
 
 function Hero() {
   const { t, lang, setLang } = useI18n()
@@ -29,6 +30,7 @@ function Hero() {
     </header>
   )
 }
+const navigate = useNavigate()
 
 export default function RegistrationPage() {
   return (
@@ -44,9 +46,31 @@ export default function RegistrationPage() {
           </div>
         </div>
         <p className="text-xs text-gray-500 mt-4">
-          By registering, you agree to event terms and acknowledge the privacy notice on this site.
+          By registering, you agree to abide by Texas Expo policies, agree to be contacted for requested info, and give permission to be photographed as part of Texas Expo promotionals.
         </p>
       </main>
     </I18nProvider>
   )
+}
+async function onSubmit(values: {
+  first_name: string
+  last_name: string
+  email: string
+  phone: string
+  language: 'en'|'es'|'ko'
+  // ... any optional fields
+}) {
+  try {
+    const res = await createRegistration(values) // returns { ticket: { code } }
+    const code = res.ticket.code
+    navigate('/success', {
+      state: {
+        code,
+        first_name: values.first_name,
+        last_name: values.last_name
+      }
+    })
+  } catch (e:any) {
+    alert(`Registration failed: ${e.message}`)
+  }
 }

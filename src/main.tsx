@@ -10,9 +10,11 @@ import './index.css'
 import WhoAmI from '@/pages/admin/WhoAmI'   // <-- add
 import BoothsPage from '@/pages/admin/BoothsPage'
 import CheckinPage from '@/pages/CheckinPage'
+import SuccessPage from '@/pages/SuccessPage'
 
 const router = createBrowserRouter([
   { path: '/', element: <RegistrationPage /> },
+  { path: '/success', element: <SuccessPage /> },
   { path: '/admin/login', element: <LoginPage /> },
   { path: '/admin', element: <AdminPage /> },
   { path: '/admin/label/:id', element: <LabelPage /> },
